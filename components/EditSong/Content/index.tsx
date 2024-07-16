@@ -13,7 +13,6 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { bufferToWav, formatTime } from "@/lib/utils";
-import { set } from "react-hook-form";
 
 export function Content({ song }: { song: Song }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -61,7 +60,6 @@ export function Content({ song }: { song: Song }) {
   const handleTimeUpdate = useCallback(() => {
     if (audioRef.current) {
       if (isEditMode) {
-        // In edit mode, update editCurrentTime relative to the trim start
         const relativeTime = audioRef.current.currentTime - trimRange[0];
         setEditCurrentTime(
           Math.max(0, Math.min(relativeTime, trimRange[1] - trimRange[0]))
@@ -121,7 +119,7 @@ export function Content({ song }: { song: Song }) {
           setIsPlaying(false);
           setEditCurrentTime(0);
         }
-      }, 100); // Update every 50ms for smoother display
+      }, 50);
 
       sourceNodeRef.current.onended = () => {
         clearInterval(intervalId);
@@ -129,11 +127,11 @@ export function Content({ song }: { song: Song }) {
         setEditCurrentTime(0);
       };
 
-      // Store the interval ID so we can clear it later if needed
       return () => clearInterval(intervalId);
     },
     [audioBuffer]
   );
+
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
       if (sourceNodeRef.current) {
@@ -159,7 +157,7 @@ export function Content({ song }: { song: Song }) {
   const handleSliderChange = useCallback((value: number[]) => {
     setTrimRange(value as [number, number]);
     setCurrentTime(value[0]);
-    setEditCurrentTime(value[0]);
+    setEditCurrentTime(0);
   }, []);
 
   const handleInputChange = useCallback(
@@ -229,15 +227,15 @@ export function Content({ song }: { song: Song }) {
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Song: {song.title}</h1>
-      <p className="text-lg mb-2">Artist: {song.artist || "匿名"}</p>
+      <h1 className="text-3xl font-bold mb-4">{song.title}</h1>
+      <p className="text-lg mb-2">Artist: {song.artist || "Anonymous"}</p>
       <p className="text-lg mb-4">Duration: {formatTime(duration)}</p>
 
       <div className="bg-gray-100 p-4 rounded-lg mb-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
           <Button
             onClick={togglePlayPause}
-            className="flex items-center text-lg"
+            className="flex items-center text-lg mb-2 sm:mb-0"
           >
             {isPlaying ? (
               <PauseCircle className="mr-2" />
@@ -266,8 +264,8 @@ export function Content({ song }: { song: Song }) {
           className="mb-4"
         />
 
-        <div className="flex justify-between items-center text-sm text-gray-600">
-          <div className="flex items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-sm text-gray-600">
+          <div className="flex items-center mb-2 sm:mb-0">
             <span className="mr-2">Start:</span>
             <Input
               type="number"
@@ -296,10 +294,10 @@ export function Content({ song }: { song: Song }) {
         </div>
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center">
         <Button
           onClick={() => setIsEditMode(true)}
-          className="flex items-center text-lg"
+          className="flex items-center text-lg mb-2 sm:mb-0 w-full sm:w-auto"
           variant={isEditMode ? "default" : "outline"}
         >
           <Scissors className="mr-2" />
@@ -307,7 +305,7 @@ export function Content({ song }: { song: Song }) {
         </Button>
         <Button
           onClick={handleTrimAndDownload}
-          className="flex items-center text-lg"
+          className="flex items-center text-lg mb-2 sm:mb-0 w-full sm:w-auto"
           disabled={isProcessing || !isEditMode}
         >
           <Download className="mr-2" />
@@ -315,7 +313,7 @@ export function Content({ song }: { song: Song }) {
         </Button>
         <Button
           onClick={resetToOriginal}
-          className="flex items-center text-lg"
+          className="flex items-center text-lg w-full sm:w-auto"
           variant="outline"
         >
           <RotateCcw className="mr-2" />

@@ -389,7 +389,7 @@ export async function getTrendingSongs(
   }
   const offset = (page - 1) * limit;
   // 延迟
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 100));
   const extendedSongs = [...songs];
 
   return extendedSongs.slice(offset, offset + limit);
@@ -407,7 +407,7 @@ export async function getLatestSongs(
   }
   const offset = (page - 1) * limit;
   // 延迟
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 100));
   const extendedSongs = songs.filter((song) => song.is_trending === true);
 
   return extendedSongs.slice(offset, offset + limit);
@@ -415,7 +415,7 @@ export async function getLatestSongs(
 
 export async function findByUuid(uuid: string): Promise<Song | undefined> {
   // Delay to simulate async operation
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 100));
   return songs.find((song) => song.uuid === uuid);
 }
 
@@ -431,7 +431,7 @@ export async function getRandomSongs(
   }
   const offset = (page - 1) * limit;
   // 延迟
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 100));
   const extendedSongs = [...songs];
 
   return extendedSongs.slice(offset, offset + limit);
