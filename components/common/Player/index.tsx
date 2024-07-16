@@ -126,9 +126,7 @@ export default function () {
     }
     switch (playMode) {
       case "sequence":
-        setCurrentSongIndex(
-          (prevIndex: number) => (prevIndex + 1) % playlist.length
-        );
+        setCurrentSongIndex((currentSongIndex + 1) % playlist.length);
         break;
       case "loop":
         if (audioRef.current) {
@@ -155,8 +153,7 @@ export default function () {
     switch (playMode) {
       case "sequence":
         setCurrentSongIndex(
-          (prevIndex: number) =>
-            (prevIndex - 1 + playlist.length) % playlist.length
+          (currentSongIndex - 1 + playlist.length) % playlist.length
         );
         break;
       case "loop":
