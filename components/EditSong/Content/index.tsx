@@ -101,37 +101,37 @@ export function Content({ song }: { song: Song }) {
         sourceNodeRef.current.disconnect();
       }
 
-      //   const startSample = Math.floor(start * audioBuffer.sampleRate);
-      //   const endSample = Math.floor(end * audioBuffer.sampleRate);
-
       sourceNodeRef.current = audioContextRef.current.createBufferSource();
       sourceNodeRef.current.buffer = audioBuffer;
       sourceNodeRef.current.connect(audioContextRef.current.destination);
-      sourceNodeRef.current.start(0, start, end - start);
-      sourceNodeRef.current.addEventListener("timeupdate", handleTimeUpdate);
-      sourceNodeRef.current.onended = () => {
-        setIsPlaying(false);
-        setEditCurrentTime(0); // Reset edit current time when playback ends
-      };
-      setIsPlaying(true);
 
-      // Update editCurrentTime during playback
+      const startTime = audioContextRef.current.currentTime;
+      sourceNodeRef.current.start(0, start, end - start);
+
       const updateEditTime = () => {
         if (isPlaying && isEditMode) {
-          setEditCurrentTime((prevTime) => {
-            const newTime = prevTime + 0.1; // Update every 100ms
-            if (newTime >= trimRange[1] - trimRange[0]) {
-              setIsPlaying(false);
-              return 0;
-            }
-            return newTime;
-          });
-          requestAnimationFrame(updateEditTime);
+          const elapsedTime = audioContextRef.current!.currentTime - startTime;
+          setEditCurrentTime(Math.min(elapsedTime, end - start));
+
+          if (elapsedTime < end - start) {
+            requestAnimationFrame(updateEditTime);
+          } else {
+            setIsPlaying(false);
+            setEditCurrentTime(0);
+          }
         }
       };
+
       requestAnimationFrame(updateEditTime);
+
+      sourceNodeRef.current.onended = () => {
+        setIsPlaying(false);
+        setEditCurrentTime(0);
+      };
+
+      setIsPlaying(true);
     },
-    [audioBuffer, isEditMode, isPlaying, trimRange]
+    [audioBuffer, isEditMode, isPlaying]
   );
 
   const togglePlayPause = useCallback(() => {
