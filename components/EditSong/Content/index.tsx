@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Song } from "@/types/song";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { PlayCircle, PauseCircle, Scissors } from "lucide-react";
 
 export function Content({ song }: { song: Song }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -11,6 +12,7 @@ export function Content({ song }: { song: Song }) {
   const [duration, setDuration] = useState(0);
   const [trimRange, setTrimRange] = useState<[number, number]>([0, 0]);
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -55,12 +57,18 @@ export function Content({ song }: { song: Song }) {
     const audio = audioRef.current;
     if (audio) {
       audio.addEventListener("timeupdate", handleTimeUpdate);
-      audio.addEventListener("ended", () => setIsPlaying(false));
+      audio.addEventListener("ended", () => {
+        setIsPlaying(false);
+        setIsPreviewMode(false);
+      });
     }
     return () => {
       if (audio) {
         audio.removeEventListener("timeupdate", handleTimeUpdate);
-        audio.removeEventListener("ended", () => setIsPlaying(false));
+        audio.removeEventListener("ended", () => {
+          setIsPlaying(false);
+          setIsPreviewMode(false);
+        });
       }
     };
   }, [handleTimeUpdate]);
@@ -70,12 +78,16 @@ export function Content({ song }: { song: Song }) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.currentTime = trimRange[0];
-        audioRef.current.play();
+        if (isPreviewMode) {
+          handleTrimPreview();
+        } else {
+          audioRef.current.currentTime = trimRange[0];
+          audioRef.current.play();
+        }
       }
       setIsPlaying(!isPlaying);
     }
-  }, [isPlaying, trimRange]);
+  }, [isPlaying, trimRange, isPreviewMode]);
 
   const handleTrimPreview = useCallback(() => {
     if (!audioContextRef.current || !audioBuffer) return;
@@ -108,44 +120,88 @@ export function Content({ song }: { song: Song }) {
     setIsPlaying(true);
   }, [audioBuffer, trimRange]);
 
-  const handleSliderChange = useCallback((value: number[]) => {
-    setTrimRange(value as [number, number]);
-  }, []);
+  const handleSliderChange = useCallback(
+    (value: number[]) => {
+      setTrimRange(value as [number, number]);
+      if (audioRef.current && !isPlaying) {
+        audioRef.current.currentTime = value[0];
+        setCurrentTime(value[0]);
+      }
+    },
+    [isPlaying]
+  );
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">{song.title}</h1>
-      <div className="mb-4">
-        <p>Artist: {song.artist || "匿名"}</p>
-        <p>Duration: {duration.toFixed(2)}s</p>
-      </div>
-      <audio ref={audioRef} src={song.audio_url} />
-      <div className="flex items-center mb-4">
-        <Button onClick={togglePlayPause}>
-          {isPlaying ? "Pause" : "Play"}
-        </Button>
-        <div className="ml-4">
-          {currentTime.toFixed(2)} / {duration.toFixed(2)}
+    <div className="p-4 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">{song.title}</h1>
+      <p className="text-lg mb-2">Artist: {song.artist || "匿名"}</p>
+      <p className="text-lg mb-4">Duration: {formatTime(duration)}</p>
+
+      <div className="bg-gray-100 p-4 rounded-lg mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            onClick={togglePlayPause}
+            className="flex items-center text-lg"
+          >
+            {isPlaying ? (
+              <PauseCircle className="mr-2" />
+            ) : (
+              <PlayCircle className="mr-2" />
+            )}
+            {isPlaying ? "Pause" : "Play"}
+          </Button>
+          <div className="text-lg font-semibold">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </div>
+        </div>
+
+        <Slider
+          min={0}
+          max={duration}
+          step={0.1}
+          value={trimRange}
+          onValueChange={handleSliderChange}
+          className="mb-4"
+        />
+
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>Start: {formatTime(trimRange[0])}</span>
+          <span>End: {formatTime(trimRange[1])}</span>
         </div>
       </div>
-      <Slider
-        min={0}
-        max={duration}
-        step={0.1}
-        value={trimRange}
-        onValueChange={handleSliderChange}
-        className="mb-4"
-      />
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Edit Song</h2>
-        <div className="flex items-center mb-2">
-          <span className="mr-2">Start: {trimRange[0].toFixed(2)}s</span>
-          <span className="ml-4 mr-2">End: {trimRange[1].toFixed(2)}s</span>
-        </div>
-        <Button onClick={handleTrimPreview} className="mt-2">
+
+      <div className="flex justify-between items-center">
+        <Button
+          onClick={() => {
+            setIsPreviewMode(true);
+            handleTrimPreview();
+          }}
+          className="flex items-center text-lg"
+        >
+          <Scissors className="mr-2" />
           Preview Trim
         </Button>
+        <Button
+          onClick={() => {
+            setIsPreviewMode(false);
+            if (audioRef.current) {
+              audioRef.current.currentTime = trimRange[0];
+            }
+          }}
+          className="flex items-center text-lg"
+          variant="outline"
+        >
+          Reset to Original
+        </Button>
       </div>
+
+      <audio ref={audioRef} src={song.audio_url} style={{ display: "none" }} />
     </div>
   );
 }
