@@ -1,6 +1,8 @@
 import { Content } from "@/components/EditSong/Content";
 import { findByUuid } from "@/models/song";
 
+export const runtime = "edge";
+
 export default async function EditSongPage({
   params,
 }: {

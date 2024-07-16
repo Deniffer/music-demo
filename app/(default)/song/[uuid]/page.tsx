@@ -8,6 +8,8 @@ import Header from "@/components/Song/Header";
 import Lyrics from "@/components/Song/Content/Lyrics";
 import RecommandList from "@/components/Song/Content/RecommandList";
 
+export const runtime = "edge";
+
 export default async function ({ params }: { params: { uuid: string } }) {
   let song = await findByUuid(params.uuid);
 

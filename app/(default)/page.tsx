@@ -3,6 +3,8 @@ import { getLatestSongs, getTrendingSongs } from "@/models/song";
 
 import Scroll from "@/components/common/PlayList/Scroll";
 
+export const runtime = "edge";
+
 export default async function HomePage() {
   const trendingSongs = await getTrendingSongs(1, 50);
   const trendingLoading = false;
