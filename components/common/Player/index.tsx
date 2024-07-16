@@ -25,6 +25,8 @@ import { Song } from "@/types/song";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/app";
 import Share from "../Share";
+import { PauseIcon, PlayIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function () {
   const router = useRouter();
@@ -393,22 +395,19 @@ export default function () {
               </button>
 
               <button onClick={playPrev} className="">
-                <MdOutlineSkipPrevious className="text-3xl text-primary" />
+                <MdOutlineSkipPrevious className="text-3xl " />
               </button>
 
-              <button
-                onClick={togglePlay}
-                className="p-1 bg-primary rounded-full text-neutral"
-              >
+              <Button onClick={togglePlay} className="rounded-full size-9 p-0">
                 {isPlaying ? (
-                  <MdOutlinePause className="text-3xl" />
+                  <PauseIcon className="text-3xl" />
                 ) : (
-                  <MdOutlinePlayArrow className="text-3xl" />
+                  <PlayIcon className="text-3xl" />
                 )}
-              </button>
+              </Button>
 
               <button onClick={playNext} className="">
-                <MdOutlineSkipNext className="text-3xl text-primary" />
+                <MdOutlineSkipNext className="text-3xl" />
               </button>
 
               <button onClick={togglePlayMode} className="">

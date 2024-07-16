@@ -46,49 +46,37 @@ export default function ({ song }: { song: Song }) {
 
         <div className="mt-2 flex gap-x-2 md:gap-x-4 text-md text-base-content">
           {currentSong && currentSong.uuid === song.uuid ? (
-            <Button
-              size="sm"
-              className="flex items-center gap-x-1 w-20 bg-base-300"
-            >
+            <Button size="sm" variant={"outline"}>
               <img src="/playing.gif" />
             </Button>
           ) : (
             <Button
               size="sm"
-              className="flex items-center gap-x-1 w-20 truncate"
+              variant={"outline"}
               onClick={() => playSong(song)}
             >
               <MdOutlinePlayArrow className="text-2xl" />
               {"play"}
             </Button>
           )}
-          <Button
-            size="sm"
-            className="flex items-center gap-x-1 bg-base-300 text-base-content"
-          >
+          <Button size="sm" variant={"outline"}>
             <MdHeadset className="text-xl" />
             {song.play_count}
           </Button>
-          <Button
-            size="sm"
-            className="flex items-center gap-x-1 bg-base-300 text-base-content"
-          >
+          <Button size="sm" variant={"outline"}>
             <AiOutlineLike className="text-xl" />
             {song.upvote_count}
           </Button>
 
           <Button
             size="sm"
-            className="hidden md:flex items-center gap-x-1 bg-base-300 text-base-content"
+            variant={"outline"}
             onClick={() => router.push(`/song/${song.uuid}/edit`)}
           >
             <EditIcon className="text-2xl" />
           </Button>
 
-          <Button
-            size="sm"
-            className="flex items-center gap-x-1 bg-base-300 text-base-content"
-          >
+          <Button size="sm" variant={"outline"}>
             <Share song={song} />
           </Button>
           {/* <Button
