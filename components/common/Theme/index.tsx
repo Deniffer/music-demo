@@ -14,12 +14,12 @@ export default function Theme() {
     <>
       {theme === "dark" ? (
         <BsSun
-          className="cursor-pointer text-md"
+          className="cursor-pointer text-lg size-6"
           onClick={() => handleThemeChange("light")}
         />
       ) : (
         <BsMoonStars
-          className="cursor-pointer text-lg"
+          className="cursor-pointer text-lg size-6"
           onClick={() => handleThemeChange("dark")}
         />
       )}

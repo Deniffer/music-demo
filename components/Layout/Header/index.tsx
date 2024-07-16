@@ -9,13 +9,14 @@ import Link from "next/link";
 import { useAppStore } from "@/store/app";
 import SideBar from "../SideBar";
 import Theme from "@/components/common/Theme";
+import Image from "next/image";
 
 export default function () {
   const { isSiderOpen, setIsSiderOpen } = useAppStore();
 
   return (
-    <header className="flex h-16 left-0 right-0 fixed bg-base-100 z-50 items-center gap-4 border-b border-base-300 px-4 lg:h-[80px] lg:px-6">
-      {/* <Sheet open={isSiderOpen} onOpenChange={setIsSiderOpen}>
+    <header className="flex h-16 left-0 right-0 fixed bg-base-100 z-50 items-center gap-6 border-b border-base-300 px-4 lg:h-[80px] lg:px-6">
+      <Sheet open={isSiderOpen} onOpenChange={setIsSiderOpen}>
         <SheetTrigger asChild>
           <Button
             variant="outline"
@@ -33,7 +34,7 @@ export default function () {
         >
           <SideBar />
         </SheetContent>
-      </Sheet> */}
+      </Sheet>
 
       <div className="mr-8">
         <Link href="/" className="flex items-center gap-x-2 font-semibold">
@@ -44,7 +45,16 @@ export default function () {
         </Link>
       </div>
 
+      <div className="w-full flex-1"> </div>
+
       <Theme />
+      <Image
+        src="/avatar.png"
+        className="rounded-full w-10 h-10 cursor-pointer"
+        alt="avatar"
+        width={40}
+        height={40}
+      />
     </header>
   );
 }

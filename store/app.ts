@@ -15,10 +15,11 @@ export interface AppStore extends AppState {
   setPlaylist: (playlist: Song[]) => void;
   setCurrentSongIndex: (currentSongIndex: number) => void;
   setTheme: (theme: string) => void;
+  appendPlaylist: (song: Song) => void;
   //   setState: (state: Partial<AppState>) => void;
 }
 
-export const useAppStore = create<AppStore>((set) => ({
+export const useAppStore = create<AppStore>((set, get) => ({
   isSiderOpen: false,
   currentSong: null,
   playlist: [],
@@ -30,4 +31,5 @@ export const useAppStore = create<AppStore>((set) => ({
   setPlaylist: (playlist) => set({ playlist }),
   setCurrentSongIndex: (currentSongIndex) => set({ currentSongIndex }),
   setTheme: (theme) => set({ theme }),
+  appendPlaylist: (song) => set({ playlist: [...get().playlist, song] }),
 }));
