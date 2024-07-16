@@ -10,10 +10,14 @@ import moment from "moment";
 import { Song } from "@/types/song";
 import { useAppStore } from "@/store/app";
 import Share from "@/components/common/Share";
+import { EditIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ({ song }: { song: Song }) {
   const { appendPlaylist, currentSong, setCurrentSong, setCurrentSongIndex } =
     useAppStore();
+
+  const router = useRouter();
 
   const playSong = function (song: Song) {
     appendPlaylist(song);
@@ -72,6 +76,15 @@ export default function ({ song }: { song: Song }) {
             <AiOutlineLike className="text-xl" />
             {song.upvote_count}
           </Button>
+
+          <Button
+            size="sm"
+            className="hidden md:flex items-center gap-x-1 bg-base-300 text-base-content"
+            onClick={() => router.push(`/song/${song.uuid}/edit`)}
+          >
+            <EditIcon className="text-2xl" />
+          </Button>
+
           <Button
             size="sm"
             className="flex items-center gap-x-1 bg-base-300 text-base-content"
