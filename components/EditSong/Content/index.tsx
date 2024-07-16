@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Song } from "@/types/song";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { PlayCircle, PauseCircle, Scissors } from "lucide-react";
+import { PlayCircle, PauseCircle, Scissors, Download } from "lucide-react";
+import { bufferToWav, formatTime } from "@/lib/utils";
 
 export function Content({ song }: { song: Song }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -13,6 +14,7 @@ export function Content({ song }: { song: Song }) {
   const [trimRange, setTrimRange] = useState<[number, number]>([0, 0]);
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -131,15 +133,51 @@ export function Content({ song }: { song: Song }) {
     [isPlaying]
   );
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
+  const handleTrimAndDownload = useCallback(async () => {
+    if (!audioBuffer || !audioContextRef.current) return;
+
+    setIsProcessing(true);
+    try {
+      const startSample = Math.floor(trimRange[0] * audioBuffer.sampleRate);
+      const endSample = Math.floor(trimRange[1] * audioBuffer.sampleRate);
+      const trimmedBuffer = audioContextRef.current.createBuffer(
+        audioBuffer.numberOfChannels,
+        endSample - startSample,
+        audioBuffer.sampleRate
+      );
+
+      for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+        const channelData = audioBuffer.getChannelData(channel);
+        const trimmedData = trimmedBuffer.getChannelData(channel);
+        for (let i = 0; i < trimmedBuffer.length; i++) {
+          trimmedData[i] = channelData[i + startSample];
+        }
+      }
+
+      // Convert AudioBuffer to WAV
+      const wavBuffer = bufferToWav(trimmedBuffer);
+      const blob = new Blob([wavBuffer], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary anchor element and trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${song.title}_trimmed.wav`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error trimming audio:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [audioBuffer, song.title, trimRange]);
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">{song.title}</h1>
+      <h1 className="text-3xl font-bold mb-4">Song: {song.title}</h1>
       <p className="text-lg mb-2">Artist: {song.artist || "匿名"}</p>
       <p className="text-lg mb-4">Duration: {formatTime(duration)}</p>
 
@@ -186,6 +224,14 @@ export function Content({ song }: { song: Song }) {
         >
           <Scissors className="mr-2" />
           Preview Trim
+        </Button>
+        <Button
+          onClick={handleTrimAndDownload}
+          className="flex items-center text-lg"
+          disabled={isProcessing}
+        >
+          <Download className="mr-2" />
+          {isProcessing ? "Processing..." : "Download Trimmed Audio"}
         </Button>
         <Button
           onClick={() => {
