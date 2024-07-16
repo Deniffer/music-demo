@@ -119,7 +119,9 @@ export async function getTrendingSongs(
   const offset = (page - 1) * limit;
   // 延迟
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  return songs.slice(offset, offset + limit);
+  const extendedSongs = [...songs, ...songs, ...songs, ...songs];
+
+  return extendedSongs.slice(offset, offset + limit);
 }
 
 export async function getLatestSongs(
@@ -135,5 +137,7 @@ export async function getLatestSongs(
   const offset = (page - 1) * limit;
   // 延迟
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  return songs.slice(offset, offset + limit);
+  const extendedSongs = [...songs, ...songs, ...songs, ...songs];
+
+  return extendedSongs.slice(offset, offset + limit);
 }

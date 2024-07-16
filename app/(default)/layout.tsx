@@ -5,10 +5,7 @@ import { ReactNode } from "react";
 
 export default function HomeLayout({ children }: { children: ReactNode }) {
   return (
-
     <div className="grid min-h-screen w-full overflow-hidden md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="bg-red-500 text-white p-4">Test</div>
-
       <div className="hidden border-r border-base-300 md:block">
         <div className="flex h-full max-h-screen fixed flex-col gap-2">
           <div className="flex h-16 items-center border-b border-base-300 px-4 lg:h-[80px] lg:px-6"></div>
