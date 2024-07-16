@@ -108,32 +108,32 @@ export function Content({ song }: { song: Song }) {
       const startTime = audioContextRef.current.currentTime;
       sourceNodeRef.current.start(0, start, end - start);
 
-      const updateEditTime = () => {
-        if (isPlaying && isEditMode) {
-          const elapsedTime = audioContextRef.current!.currentTime - startTime;
-          setEditCurrentTime(Math.min(elapsedTime, end - start));
+      setIsPlaying(true);
+      setEditCurrentTime(0);
 
-          if (elapsedTime < end - start) {
-            requestAnimationFrame(updateEditTime);
-          } else {
-            setIsPlaying(false);
-            setEditCurrentTime(0);
-          }
+      const intervalId = setInterval(() => {
+        const elapsedTime = audioContextRef.current!.currentTime - startTime;
+        const newEditCurrentTime = Math.min(elapsedTime, end - start);
+        setEditCurrentTime(newEditCurrentTime);
+
+        if (elapsedTime >= end - start) {
+          clearInterval(intervalId);
+          setIsPlaying(false);
+          setEditCurrentTime(0);
         }
-      };
-
-      requestAnimationFrame(updateEditTime);
+      }, 100); // Update every 50ms for smoother display
 
       sourceNodeRef.current.onended = () => {
+        clearInterval(intervalId);
         setIsPlaying(false);
         setEditCurrentTime(0);
       };
 
-      setIsPlaying(true);
+      // Store the interval ID so we can clear it later if needed
+      return () => clearInterval(intervalId);
     },
-    [audioBuffer, isEditMode, isPlaying]
+    [audioBuffer]
   );
-
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
       if (sourceNodeRef.current) {
